@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/0/7d1e7c367aa94b248f0ba5d99f4e8bcc/artifacts
+end_time: 1751310610234
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 7d1e7c367aa94b248f0ba5d99f4e8bcc
+run_name: monumental-rat-988
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751310608677
+status: 3
+tags: []
+user_id: g

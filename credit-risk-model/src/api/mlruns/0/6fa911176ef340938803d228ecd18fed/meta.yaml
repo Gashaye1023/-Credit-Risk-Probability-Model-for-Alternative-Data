@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/0/6fa911176ef340938803d228ecd18fed/artifacts
+end_time: 1751310611846
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 6fa911176ef340938803d228ecd18fed
+run_name: gifted-cub-472
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751310610317
+status: 3
+tags: []
+user_id: g

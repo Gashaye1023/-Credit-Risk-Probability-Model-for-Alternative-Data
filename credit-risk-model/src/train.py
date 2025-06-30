@@ -1,158 +1,130 @@
-import mlflow
-import mlflow.sklearn
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.metrics import (accuracy_score, precision_score, recall_score, 
-                           f1_score, roc_auc_score, confusion_matrix)
-from sklearn.model_selection import GridSearchCV
-from .data_processing import create_feature_pipeline
 import pandas as pd
-import logging
+from datetime import datetime, timedelta
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import numpy as np
+import warnings
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Suppress all warnings
+warnings.filterwarnings('ignore')
 
-def load_data(filepath):
-    """Load and preprocess data"""
-    try:
-        df = pd.read_csv(filepath)
-        pipeline = create_feature_pipeline()
-        features = pipeline.fit_transform(df)
-        
-        # Get target variable
-        target = pipeline.named_steps['labeler'].named_steps['high_risk_labeler'].is_high_risk
-        
-        # Get feature names
-        num_features = ['Recency', 'Frequency', 'MonetaryTotal', 
-                       'MonetaryMean', 'MonetaryMax', 'MonetaryMin', 'MonetaryStd']
-        cat_features = pipeline.named_steps['preprocessor'].named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(['ProductCategory', 'ChannelId'])
-        feature_names = num_features + list(cat_features)
-        
-        return features, target, feature_names
-        
-    except Exception as e:
-        logger.error(f"Error loading data: {str(e)}")
-        raise
+# --- 1. Generate Sample Transaction Data ---
+# In a real scenario, you would load your transaction data here.
+df_transactions = pd.read_csv('./Final_preprocessed_data.csv')
 
-def train_models(X_train, y_train):
-    """Train and evaluate multiple models"""
-    
-    # Define models and parameters for grid search
-    models = {
-        'LogisticRegression': {
-            'model': LogisticRegression(max_iter=1000, random_state=42),
-            'params': {
-                'C': [0.1, 1, 10],
-                'penalty': ['l1', 'l2'],
-                'solver': ['liblinear']
-            }
-        },
-        'RandomForest': {
-            'model': RandomForestClassifier(random_state=42),
-            'params': {
-                'n_estimators': [50, 100],
-                'max_depth': [None, 10, 20],
-                'min_samples_split': [2, 5]
-            }
-        },
-        'GradientBoosting': {
-            'model': GradientBoostingClassifier(random_state=42),
-            'params': {
-                'n_estimators': [50, 100],
-                'learning_rate': [0.01, 0.1],
-                'max_depth': [3, 5]
-            }
-        }
-    }
-    
-    best_model = None
-    best_score = 0
-    
-    for model_name, config in models.items():
-        with mlflow.start_run(run_name=model_name):
-            # Log model parameters
-            mlflow.log_params({'model': model_name})
-            
-            # Grid search
-            grid = GridSearchCV(
-                config['model'],
-                config['params'],
-                cv=5,
-                scoring='roc_auc',
-                n_jobs=-1
-            )
-            grid.fit(X_train, y_train)
-            
-            # Log best parameters and metrics
-            mlflow.log_params(grid.best_params_)
-            mlflow.log_metric("best_cv_score", grid.best_score_)
-            
-            # Track best model
-            if grid.best_score_ > best_score:
-                best_score = grid.best_score_
-                best_model = grid.best_estimator_
-                
-            # Log model
-            mlflow.sklearn.log_model(grid.best_estimator_, model_name)
-            
-            logger.info(f"{model_name} - Best AUC: {grid.best_score_:.4f}")
-    
-    return best_model
+np.random.seed(42) # for reproducibility of synthetic data
 
-def evaluate_model(model, X_test, y_test):
-    """Evaluate model performance"""
-    try:
-        y_pred = model.predict(X_test)
-        y_proba = model.predict_proba(X_test)[:, 1]
-        
-        metrics = {
-            'accuracy': accuracy_score(y_test, y_pred),
-            'precision': precision_score(y_test, y_pred),
-            'recall': recall_score(y_test, y_pred),
-            'f1': f1_score(y_test, y_pred),
-            'roc_auc': roc_auc_score(y_test, y_proba)
-        }
-        
-        # Log metrics to MLflow
-        for name, value in metrics.items():
-            mlflow.log_metric(f"test_{name}", value)
-            
-        # Log confusion matrix
-        cm = confusion_matrix(y_test, y_pred)
-        mlflow.log_metric("tn", cm[0][0])
-        mlflow.log_metric("fp", cm[0][1])
-        mlflow.log_metric("fn", cm[1][0])
-        mlflow.log_metric("tp", cm[1][1])
-        
-        return metrics
-        
-    except Exception as e:
-        logger.error(f"Error evaluating model: {str(e)}")
-        raise
+num_customers = 500
+start_date = datetime(2023, 1, 1)
+end_date = datetime(2024, 12, 31)
 
-def main():
-    # Initialize MLflow
-    mlflow.set_experiment("Credit_Risk_Modeling")
-    
-    # Load and split data
-    X, y, feature_names = load_data('../data/raw/xente_transactions.csv')
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
-    
-    # Train models
-    best_model = train_models(X_train, y_train)
-    
-    # Evaluate best model
-    metrics = evaluate_model(best_model, X_test, y_test)
-    logger.info(f"Best model metrics: {metrics}")
-    
-    # Register best model
-    mlflow.sklearn.log_model(best_model, "best_model")
-    mlflow.sklearn.save_model(best_model, "../models/best_model")
-    
-    logger.info("Training completed successfully")
+data = []
+for customer_id in range(1, num_customers + 1):
+    # Simulate varying transaction frequencies and amounts
+    num_transactions = np.random.randint(1, 30) # Customers can have 1 to 30 transactions
+    for _ in range(num_transactions):
+        random_days = np.random.randint(0, (end_date - start_date).days)
+        transaction_date = start_date + timedelta(days=random_days)
+        amount = np.random.uniform(10, 1000) # Transaction amounts between 10 and 1000
+        data.append({'CustomerId': customer_id, 'TransactionDate': transaction_date, 'Amount': amount})
 
-if __name__ == "__main__":
-    main()
+df_transactions = pd.DataFrame(data)
+
+print("--- Sample Transaction Data ---")
+print(df_transactions.head())
+print(f"\nTotal transactions: {len(df_transactions)}")
+print(f"Unique customers: {df_transactions['CustomerId'].nunique()}")
+
+# --- 2. Calculate RFM Metrics ---
+
+# Define a snapshot date: The day after the latest transaction in the dataset
+snapshot_date = df_transactions['TransactionDate'].max() + timedelta(days=1)
+print(f"\nSnapshot Date for Recency calculation: {snapshot_date}")
+
+# Calculate RFM for each customer
+rfm_df = df_transactions.groupby('CustomerId').agg(
+    Recency=('TransactionDate', lambda date: (snapshot_date - date.max()).days),
+    Frequency=('TransactionDate', 'count'),
+    Monetary=('Amount', 'sum')
+).reset_index()
+
+print("\n--- Calculated RFM Metrics (Raw) ---")
+print(rfm_df.head())
+print(f"\nRFM DataFrame shape: {rfm_df.shape}")
+
+
+# Initialize StandardScaler
+scaler = StandardScaler()
+
+# Select RFM features for scaling
+rfm_features = rfm_df[['Recency', 'Frequency', 'Monetary']]
+
+# Scale the features
+scaled_rfm_features = scaler.fit_transform(rfm_features)
+scaled_rfm_df = pd.DataFrame(scaled_rfm_features, columns=rfm_features.columns, index=rfm_df.index)
+
+print("\n--- Scaled RFM Features ---")
+print(scaled_rfm_df.head())
+
+# --- 4. Cluster Customers using K-Means ---
+
+# Set random_state for reproducibility
+random_state = 42
+kmeans = KMeans(n_clusters=3, random_state=random_state, n_init=10) # n_init for robust centroid initialization
+
+# Fit K-Means to the scaled data
+kmeans.fit(scaled_rfm_df)
+
+# Add cluster labels to the RFM DataFrame
+rfm_df['Cluster'] = kmeans.labels_
+
+print("\n--- RFM Data with Cluster Labels ---")
+print(rfm_df.head())
+print(f"\nCluster distribution:\n{rfm_df['Cluster'].value_counts()}")
+
+cluster_analysis = rfm_df.groupby('Cluster').agg(
+    AvgRecency=('Recency', 'mean'),
+    AvgFrequency=('Frequency', 'mean'),
+    AvgMonetary=('Monetary', 'mean'),
+    Count=('CustomerId', 'count')
+).sort_values(by=['AvgRecency', 'AvgFrequency', 'AvgMonetary'], ascending=[False, True, True]) # Sort to find high-risk
+
+print("\n--- Cluster Analysis (Mean RFM Values) ---")
+print(cluster_analysis)
+high_risk_cluster_id = cluster_analysis.index[0]
+print(f"\nIdentified High-Risk Cluster ID: {high_risk_cluster_id}")
+
+# Create the new binary target column 'is_high_risk'
+rfm_df['is_high_risk'] = rfm_df['Cluster'].apply(lambda x: 1 if x == high_risk_cluster_id else 0)
+
+print("\n--- RFM Data with 'is_high_risk' Label ---")
+print(rfm_df.head())
+print(f"\nHigh-risk customer count: {rfm_df['is_high_risk'].sum()}")
+
+# --- 6. Integrate the Target Variable ---
+
+main_data = []
+for customer_id in range(1, num_customers + 1):
+    age = np.random.randint(20, 70)
+    income = np.random.uniform(30000, 100000)
+    main_data.append({'CustomerId': customer_id, 'Age': age, 'Income': income})
+
+df_main = pd.DataFrame(main_data)
+
+print("\n--- Sample Main Processed Dataset (Before Merge) ---")
+print(df_main.head())
+print(f"\nMain dataset shape: {df_main.shape}")
+
+# Merge the 'is_high_risk' column back into the main processed dataset
+# We only need CustomerId and is_high_risk from rfm_df
+df_main = pd.merge(df_main, rfm_df[['CustomerId', 'is_high_risk']], on='CustomerId', how='left')
+
+print("\n--- Main Processed Dataset (After Merge with 'is_high_risk') ---")
+print(df_main.head())
+print(f"\nMain dataset shape after merge: {df_main.shape}")
+
+# Verify that all customers from the main dataset have an 'is_high_risk' label
+print(f"\nMissing 'is_high_risk' values: {df_main['is_high_risk'].isnull().sum()}")
+
+# Final check: distribution of the new target variable
+print(f"\nDistribution of 'is_high_risk':\n{df_main['is_high_risk'].value_counts()}")
