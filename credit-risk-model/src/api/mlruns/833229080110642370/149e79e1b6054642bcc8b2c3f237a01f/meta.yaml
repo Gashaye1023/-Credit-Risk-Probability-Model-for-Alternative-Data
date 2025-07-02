@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/833229080110642370/149e79e1b6054642bcc8b2c3f237a01f/artifacts
+end_time: 1751456119605
+entry_point_name: ''
+experiment_id: '833229080110642370'
+lifecycle_stage: active
+run_id: 149e79e1b6054642bcc8b2c3f237a01f
+run_name: logistic_regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751456073709
+status: 3
+tags: []
+user_id: g

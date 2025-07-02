@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/833229080110642370/2c57bef91ec749ae8cba4b89e6f5bde3/artifacts
+end_time: 1751461010372
+entry_point_name: ''
+experiment_id: '833229080110642370'
+lifecycle_stage: active
+run_id: 2c57bef91ec749ae8cba4b89e6f5bde3
+run_name: gradient_boosting
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751459500929
+status: 3
+tags: []
+user_id: g

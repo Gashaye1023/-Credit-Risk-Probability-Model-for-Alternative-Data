@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/777123970421822699/78e143b10c83457b924e1f266a92b3c7/artifacts
+end_time: 1751454776441
+entry_point_name: ''
+experiment_id: '777123970421822699'
+lifecycle_stage: active
+run_id: 78e143b10c83457b924e1f266a92b3c7
+run_name: carefree-mink-721
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751454776264
+status: 4
+tags: []
+user_id: g

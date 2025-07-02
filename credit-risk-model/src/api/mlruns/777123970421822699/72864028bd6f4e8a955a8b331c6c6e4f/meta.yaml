@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/777123970421822699/72864028bd6f4e8a955a8b331c6c6e4f/artifacts
+end_time: 1751454721560
+entry_point_name: ''
+experiment_id: '777123970421822699'
+lifecycle_stage: active
+run_id: 72864028bd6f4e8a955a8b331c6c6e4f
+run_name: adventurous-fawn-318
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751454721552
+status: 4
+tags: []
+user_id: g

@@ -1,0 +1,14 @@
+artifact_uri: file:///home/g/10/week5/-Credit-Risk-Probability-Model-for-Alternative-Data/credit-risk-model/src/api/mlruns/0/c9c2e978dc864c7cb4b8b8b46b62b310/artifacts
+end_time: 1751452915670
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: c9c2e978dc864c7cb4b8b8b46b62b310
+run_name: Random Forest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751452894005
+status: 3
+tags: []
+user_id: g
